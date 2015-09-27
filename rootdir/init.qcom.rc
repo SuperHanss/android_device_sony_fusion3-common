@@ -400,11 +400,10 @@ service thermanager /system/bin/thermanager /system/etc/thermanager.xml
     user root
     group root
 
-service mpdecision /system/bin/mpdecision --no_sleep --avg_comp
-    class main
+service mpdecision /system/bin/mpdecision --avg_comp
+    class late_start
     user root
-    group root system
-    disabled
+    group system
 
 # bugreport is triggered by holding down volume down, volume up and power
 service bugreport /system/bin/dumpstate -d -p -B \

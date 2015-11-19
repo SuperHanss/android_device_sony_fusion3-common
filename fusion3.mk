@@ -68,11 +68,9 @@ PRODUCT_PACKAGES += \
     copybit.msm8960 \
     memtrack.msm8960 \
     libgenlock \
-    libmemalloc \
     liboverlay \
     libqdutils \
-    libtilerenderer \
-    libI420colorconvert
+    libqdMetaData
 
 # QCOM Display
 PRODUCT_PROPERTY_OVERRIDES += \
@@ -91,7 +89,11 @@ PRODUCT_PACKAGES += \
     libdashplayer \
     libdivxdrmdecrypt \
     libmm-omxcore \
-    libstagefrighthw
+    libstagefrighthw \
+    qcmediaplayer
+
+PRODUCT_BOOT_JARS += \
+    qcmediaplayer
 
 # NFC Support
 PRODUCT_PACKAGES += \
@@ -133,6 +135,7 @@ PRODUCT_PACKAGES += \
     audio.a2dp.default \
     audio.usb.default \
     audio.r_submix.default \
+    libaudio-resampler \
     tinymix
 
 # BT
@@ -153,12 +156,6 @@ PRODUCT_COPY_FILES += \
     frameworks/av/media/libstagefright/data/media_codecs_google_video.xml:system/etc/media_codecs_google_video.xml \
     $(COMMON_PATH)/rootdir/system/etc/media_codecs.xml:system/etc/media_codecs.xml \
     $(COMMON_PATH)/rootdir/system/etc/media_profiles.xml:system/etc/media_profiles.xml
-
-PRODUCT_PACKAGES += \
-    qcmediaplayer
-
-PRODUCT_BOOT_JARS += \
-    qcmediaplayer
 
 # Lights wrapper
 PRODUCT_PACKAGES += \

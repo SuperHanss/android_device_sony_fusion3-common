@@ -68,9 +68,7 @@ PRODUCT_PACKAGES += \
     copybit.msm8960 \
     memtrack.msm8960 \
     libgenlock \
-    liboverlay \
-    libqdutils \
-    libqdMetaData
+    liboverlay
 
 # QCOM Display
 PRODUCT_PROPERTY_OVERRIDES += \
@@ -78,22 +76,12 @@ PRODUCT_PROPERTY_OVERRIDES += \
 
 # OMX
 PRODUCT_PACKAGES += \
-    libOmxAacEnc \
-    libOmxAmrEnc \
-    libOmxCore \
-    libOmxEvrcEnc \
-    libOmxQcelp13Enc \
     libOmxVdec \
     libOmxVenc \
     libc2dcolorconvert \
-    libdashplayer \
     libdivxdrmdecrypt \
     libmm-omxcore \
-    libstagefrighthw \
-    qcmediaplayer
-
-PRODUCT_BOOT_JARS += \
-    qcmediaplayer
+    libstagefrighthw
 
 # NFC Support
 PRODUCT_PACKAGES += \

@@ -394,7 +394,7 @@ service thermanager /system/bin/thermanager /system/etc/thermanager.xml
     group root
 
 service mpdecision /system/bin/mpdecision --avg_comp
-    class late_start
+    class main
     user root
     group system
 

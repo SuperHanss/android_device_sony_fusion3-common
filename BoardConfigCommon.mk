@@ -84,7 +84,8 @@ NUM_FRAMEBUFFER_SURFACE_BUFFERS := 3
 
 # Healthd
 BOARD_CHARGER_ENABLE_SUSPEND := true
-BOARD_CHARGER_SHOW_PERCENTAGE := true
+BOARD_HAL_STATIC_LIBRARIES := libhealthd.fusion3
+BOARD_HEALTHD_CUSTOM_CHARGER_RES := device/sony/fusion3-common/charger/images
 RED_LED_PATH := /sys/class/leds/lm3533-red/brightness
 GREEN_LED_PATH := /sys/class/leds/lm3533-green/brightness
 BLUE_LED_PATH := /sys/class/leds/lm3533-blue/brightness

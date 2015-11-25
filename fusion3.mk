@@ -184,9 +184,11 @@ PRODUCT_PACKAGES += \
     com.android.future.usb.accessory \
     p2p_supplicant.conf
 
-# Camera wrapper
+# Camera
 PRODUCT_PACKAGES += \
-    camera.qcom
+    camera.qcom \
+    libshim_camera \
+    libshim_cald
 
 # Custom init / uevent
 PRODUCT_COPY_FILES += \

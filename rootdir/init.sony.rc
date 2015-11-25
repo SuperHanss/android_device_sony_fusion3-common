@@ -1,3 +1,6 @@
+on init
+    export LD_SHIM_LIBS /system/lib/hw/camera.vendor.qcom.so|libshim_camera.so:/system/lib/libcald_pal.so|libshim_cald.so
+
 on boot
     # LM356x/cameralight
     chown system camera /sys/devices/i2c-0/0-0053/torch_enable

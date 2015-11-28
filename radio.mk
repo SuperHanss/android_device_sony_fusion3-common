@@ -5,7 +5,8 @@ PRODUCT_PROPERTY_OVERRIDES += \
     telephony.lteOnGsmDevice=1 \
     persist.radio.add_power_save=1 \
     rild.libpath=/system/lib/libril-qc-qmi-1.so \
-    persist.radio.oem_socket=false
+    persist.radio.oem_socket=false \
+    ro.ril.telephony.mqanelements=5
 
 # Do not power down SIM card when modem is sent to Low Power Mode.
 PRODUCT_PROPERTY_OVERRIDES += \

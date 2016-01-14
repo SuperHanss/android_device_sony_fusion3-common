@@ -123,7 +123,7 @@ PRODUCT_COPY_FILES += \
 
 # Recovery
 PRODUCT_PACKAGES += \
-    extract_elf_ramdisk
+    extract_ramdisk
 
 # ART
 PRODUCT_PACKAGES += \

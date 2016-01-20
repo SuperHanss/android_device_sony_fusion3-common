@@ -90,7 +90,7 @@ GREEN_LED_PATH := /sys/class/leds/lm3533-green/brightness
 BLUE_LED_PATH := /sys/class/leds/lm3533-blue/brightness
 
 # RIL
-#BOARD_PROVIDES_LIBRIL := true
+BOARD_PROVIDES_LIBRIL := true
 
 # Lights HAL
 TARGET_PROVIDES_FUSION3_LIBLIGHT := true

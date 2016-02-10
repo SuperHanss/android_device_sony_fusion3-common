@@ -1,5 +1,4 @@
 # camera.0.name
-allow mediaserver default_prop:property_service set;
 
 allow mediaserver camera_socket:dir w_dir_perms;
 allow mediaserver camera_socket:file create_file_perms;
@@ -7,19 +6,16 @@ allow mediaserver camera_socket:file create_file_perms;
 # /dev/msm_camera
 allow mediaserver camera_device:dir search;
 allow mediaserver camera_data_file:file open;
-allow mediaserver camera_socket:dir { add_name write };
-allow mediaserver camera_socket:file { create };
 
 allow mediaserver system_server:unix_stream_socket { read write };
+
+allow mediaserver system_file:file { execmod };
+
+allow mediaserver sensorservice_service:service_manager find;
 
 # /dev/input
 allow mediaserver input_device:dir search;
 
-# shell
-allow mediaserver shell_data_file:dir search;
-
 # ALS
 allow mediaserver input_device:chr_file r_file_perms;
 unix_socket_connect(mediaserver, illumination, illumination)
-
-allow mediaserver mediaserver_tmpfs:file { read write execute };

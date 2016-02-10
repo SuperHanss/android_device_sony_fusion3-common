@@ -11,4 +11,12 @@ allow system_server sysfs_vibrator:file rw_file_perms;
 
 allow system_server zygote:binder call;
 
-allow system_server system_prop:property_service { set };
+allow system_server init:unix_stream_socket getopt;
+allow system_server qti_init_shell:binder call;
+
+# USB sysfs
+allow system_server sysfs_usb_supply:dir search;
+allow system_server sysfs_usb_supply:file r_file_perms;
+
+allow system_server logd:dir search;
+allow system_server logd:file { read getattr open };

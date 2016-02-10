@@ -1,1 +1,0 @@
-allow sdcardd unlabeled:dir { read getattr search };

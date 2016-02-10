@@ -1,11 +1,9 @@
-# Gpu
-/dev/gss                            u:object_r:gpu_device:s0
-
 # Sockets
 /dev/socket/illumination            u:object_r:illumination_socket:s0
 /dev/socket/mpdecision(/.*)?        u:object_r:mpctl_socket:s0
 /dev/socket/mpctl                   u:object_r:mpctl_socket:s0
 /dev/socket/tad                     u:object_r:tad_socket:s0
+/dev/socket/qmux_bluetooth          u:object_r:qmuxd_socket:s0
 
 # Camera
 /dev/gemini.*                       u:object_r:camera_device:s0
@@ -26,6 +24,9 @@
 # Vibrator
 /sys/devices/virtual/timed_output/vibrator/level      u:object_r:sysfs_vibrator:s0
 
+# Block devices
+/dev/block/bootdevice/by-name/TA              u:object_r:trim_area_partition_device:s0
+
 # System binaries
 /system/bin/illumination_service    u:object_r:illumination_exec:s0
 /system/bin/mac-update              u:object_r:mac_update_exec:s0
@@ -33,9 +34,6 @@
 /system/bin/tad_static              u:object_r:tad_exec:s0
 /system/bin/thermanager             u:object_r:thermanager_exec:s0
 /system/bin/updatemiscta            u:object_r:updatemiscta_exec:s0
-
-# mdm
-/dev/block/platform/msm_sdcc.1/by-name/m9kefs(.*)        u:object_r:efs_boot_dev:s0
 
 # IR blaster
 /sys/devices/platform/ir_remote_control/enable        u:object_r:sysfs_ir_remote_control:s0

@@ -107,8 +107,6 @@ BOARD_HOSTAPD_PRIVATE_LIB        := lib_driver_cmd_$(BOARD_WLAN_DEVICE)
 WIFI_DRIVER_FW_PATH_STA          := "sta"
 WIFI_DRIVER_FW_PATH_AP           := "ap"
 
-BOARD_USE_SONY_MACUPDATE := true
-
 # Filesystem
 BOARD_FLASH_BLOCK_SIZE := 131072
 TARGET_USERIMAGES_USE_EXT4 := true
@@ -123,12 +121,6 @@ COMMON_GLOBAL_CFLAGS += -DNO_SECURE_DISCARD
 #TARGET_RECOVERY_PIXEL_FORMAT := "RGBX_8888"
 #BOARD_USE_CUSTOM_RECOVERY_FONT := \"roboto_23x41.h\"
 #RECOVERY_VARIANT := twrp
-
-# Vold
-TARGET_USE_CUSTOM_LUN_FILE_PATH := /sys/devices/platform/msm_hsusb/gadget/lun%d/file
-
-# Include an expanded selection of fonts
-EXTENDED_FONT_FOOTPRINT := true
 
 # Memory allocation
 MALLOC_IMPL := dlmalloc

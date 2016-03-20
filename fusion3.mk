@@ -86,14 +86,9 @@ PRODUCT_PACKAGES += \
     libOmxVdec \
     libOmxVenc \
     libc2dcolorconvert \
-    libdashplayer \
     libdivxdrmdecrypt \
     libmm-omxcore \
-    libstagefrighthw \
-    qcmediaplayer
-
-PRODUCT_BOOT_JARS += \
-    qcmediaplayer
+    libstagefrighthw
 
 # NFC Support
 PRODUCT_PACKAGES += \
@@ -240,7 +235,7 @@ PRODUCT_PROPERTY_OVERRIDES += \
 
 # QC Perf
 PRODUCT_PROPERTY_OVERRIDES += \
-    ro.vendor.extension_library=/vendor/lib/libqti-perfd-client.so
+    ro.vendor.extension_library=libqti-perfd-client.so
 
 # QC-QMI
 PRODUCT_PROPERTY_OVERRIDES += \
@@ -248,8 +243,7 @@ PRODUCT_PROPERTY_OVERRIDES += \
 
 # Wifi
 PRODUCT_PROPERTY_OVERRIDES += \
-    wifi.interface=wlan0 \
-    wifi.supplicant_scan_interval=15
+    wifi.interface=wlan0
 
 # WLAN
 PRODUCT_PROPERTY_OVERRIDES += \

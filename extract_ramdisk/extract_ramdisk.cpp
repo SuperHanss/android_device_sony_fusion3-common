@@ -29,12 +29,12 @@
  * yahoo
  *
  * Copyright (c) 2013
+ * Copyright (C) 2016 The CyanogenMod Project
  */
 
 #include <stdio.h>
-#include <string.h>
-#include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include "gelf.h"
@@ -68,15 +68,15 @@ int path_exists(const char* path) {
 }
 
 size_t uncompress_gzip_memory(const byte_p compressed_data,
-	const size_t compressed_data_size, byte_p uncompressed_data,
+	const size_t compressed_data_size, const byte_p uncompressed_data,
 	const size_t uncompressed_max_size) {
 	z_stream zInfo = {0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 	zInfo.avail_in = compressed_data_size;
 	zInfo.total_in = compressed_data_size;
 	zInfo.avail_out = uncompressed_max_size;
 	zInfo.total_out = uncompressed_max_size;
-	zInfo.next_in = compressed_data	;
-	zInfo.next_out = uncompressed_data;
+	zInfo.next_in = (unsigned char *)compressed_data;
+	zInfo.next_out = (unsigned char *)uncompressed_data;
 	size_t return_value = 0;
 	unsigned long err = inflateInit2(&zInfo, 16 + MAX_WBITS); // zlib function
 
@@ -85,10 +85,10 @@ size_t uncompress_gzip_memory(const byte_p compressed_data,
 		if (err == Z_STREAM_END) {
 			return_value = zInfo.total_out;
 		} else {
-			printf("gunzip error -- Err:inflate %i\n", err);
+			printf("gunzip error -- Err:inflate %lu\n", err);
 		}
 	} else {
-		printf("gunzip error -- Err:inflateInit2 %i\n", err);
+		printf("gunzip error -- Err:inflateInit2 %lu\n", err);
 	}
 	inflateEnd(&zInfo);
 	return(return_value);
@@ -98,15 +98,15 @@ int scan_file_for_data(char *filename, unsigned char *data, int data_size,
 	unsigned long start_location, unsigned long *data_address) {
 	FILE *pFile;
 	unsigned long lSize;
-	unsigned char *buffer, *last_needle = NULL;
+	unsigned char *buffer;
 	unsigned char needle[data_size];
 	size_t result;
 	int i, return_val = 0;
 
 	pFile = fopen(filename, "rb");
-	if(pFile==NULL){
+	if (pFile == NULL) {
 		printf("Unabled to open file '%s'.\nFailed\n", filename);
-		exit(-1);
+		return -2;
 	}
 
 	fseek (pFile , 0 , SEEK_END);
@@ -114,15 +114,15 @@ int scan_file_for_data(char *filename, unsigned char *data, int data_size,
 	rewind(pFile);
 
 	buffer = (unsigned char*)malloc(sizeof(unsigned char) * lSize);
-	if(buffer == NULL){
+	if (buffer == NULL) {
 		printf("Memory allocation error on '%s'!\nFailed\n", filename);
-		exit(-1);
+		return -2;
 	}
 
 	result = fread(buffer, 1, lSize, pFile);
 	if (result != lSize) {
 		printf("Error reading file '%s'\nFailed\n", filename);
-		exit(-1);
+		return -2;
 	}
 
 	for (i=0; i<data_size; i++) {
@@ -130,8 +130,8 @@ int scan_file_for_data(char *filename, unsigned char *data, int data_size,
 		data++;
 	}
 
-	unsigned char *p = memmem(buffer + start_location, lSize - start_location,
-		needle, data_size);
+	unsigned char *p = (unsigned char*) memmem(buffer + start_location,
+			lSize - start_location, needle, data_size);
 
 	if (!p) {
 		return_val = -1;
@@ -144,7 +144,7 @@ int scan_file_for_data(char *filename, unsigned char *data, int data_size,
 	return return_val;
 }
 
-void copy_file_part(const char* infile, const char* outfile,
+int copy_file_part(const char* infile, const char* outfile,
 	const unsigned long offset,	unsigned long file_size) {
 	// Copies a file starting at location offset of size file_size
 	// If file_size is 0 then this function will copy until the end of the file
@@ -155,14 +155,14 @@ void copy_file_part(const char* infile, const char* outfile,
 
 	if (path_exists(outfile) && unlink(outfile)) {
 		printf("Unable to unlink '%s'\n", outfile);
-		exit(-1);
+		return -1;
 	}
 
 	// Open input file
 	iFile = fopen(infile, "rb");
 	if (iFile == NULL) {
 		printf("Unable to open input file '%s'.\n", infile);
-		exit(-1);
+		return -1;
 	}
 
 	// Determine file size to copy
@@ -173,11 +173,11 @@ void copy_file_part(const char* infile, const char* outfile,
 	}
 
 	// Allocate memory for reading the ramdisk
-	buffer = (unsigned char*)malloc(sizeof(unsigned char) * file_size);
+	buffer = (char*)malloc(sizeof(char) * file_size);
 	if (buffer == NULL) {
 		printf("Unable to malloc memory for file copy.\n");
 		fclose(iFile);
-		exit(-1);
+		return -1;
 	}
 
 	// Read the input
@@ -188,7 +188,7 @@ void copy_file_part(const char* infile, const char* outfile,
 	if (result != file_size) {
 		printf("Error reading source file from '%s'\nFailed\n", infile);
 		free(buffer);
-		exit(-1);
+		return -1;
 	}
 
 	if (!dont_unzip) {
@@ -196,7 +196,7 @@ void copy_file_part(const char* infile, const char* outfile,
 		if (uncompressed_buffer == NULL) {
 			free(buffer);
 			printf("Unable to malloc memory for gunzip.\nFailed\n");
-			exit(-1);
+			return -1;
 		}
 		size_t uncompressed_size;
 		uncompressed_size = uncompress_gzip_memory(buffer, file_size,
@@ -205,9 +205,9 @@ void copy_file_part(const char* infile, const char* outfile,
 		if (uncompressed_size <= 0) {
 			free(uncompressed_buffer);
 			printf("Failed to gunzip\n");
-			exit(-1);
+			return -1;
 		}
-		printf("Original size: %lu, gunzipped: %lu\n", file_size,
+		printf("Original size: %lu, gunzipped: %zu\n", file_size,
 			uncompressed_size);
 		buffer = uncompressed_buffer;
 		file_size = uncompressed_size;
@@ -215,13 +215,13 @@ void copy_file_part(const char* infile, const char* outfile,
 
 	// Open the output file
 	oFile = fopen(outfile, "wb");
-	if(oFile == NULL) {
+	if (oFile == NULL) {
 		printf("Unabled to open output file '%s'.\nFailed\n", outfile);
 		if (!dont_unzip)
 			free(uncompressed_buffer);
 		else
 			free(buffer);
-		exit(-1);
+		return -1;
 	}
 
 	// Copy the file
@@ -234,13 +234,15 @@ void copy_file_part(const char* infile, const char* outfile,
 	fclose(oFile);
 	if (result != file_size) {
 		printf("Write count does not match during copy file!\n");
-		exit(-1);
+		return -1;
 	} else {
 		printf("Finished writing file: '%s'\n", outfile);
 	}
+
+	return 0;
 }
 
-void extract_elf(const char* img_filename, unsigned long* offset,
+int extract_elf(const char* img_filename, unsigned long* offset,
 	unsigned long* ramdisk_size) {
 	int img_fd;
 	Elf *e;
@@ -248,27 +250,27 @@ void extract_elf(const char* img_filename, unsigned long* offset,
 
 	if ((img_fd = open(input_filename, O_RDONLY, 0)) < 0) {
 		printf("Unable to open '%s' for read.\n", input_filename);
-		exit(-1);
+		return -1;
 	}
 
 	if ((e = elf_begin(img_fd, ELF_C_READ, NULL)) == NULL) {
 		printf("elf_begin failed.\n");
 		close(img_fd);
-		exit(-1);
+		return -1;
 	}
 
 	if (elf_kind(e) != ELF_K_ELF) {
 		printf("'%s' is not an ELF file.\n", img_filename);
 		elf_end(e);
 		close(img_fd);
-		exit(-1);
+		return -1;
 	}
 
 	if (gelf_getphdr(e, ramdisk_loc - 1, &phdr) != &phdr) {
 		printf("Failed to get header %i\n", ramdisk_loc - 1);
 		elf_end(e);
 		close(img_fd);
-		exit(-1);
+		return -1;
 	}
 	*offset = (unsigned long) phdr.p_offset;
 	*ramdisk_size = (unsigned long) phdr.p_filesz;
@@ -276,9 +278,11 @@ void extract_elf(const char* img_filename, unsigned long* offset,
 	//                                             libelf
 	elf_end(e);
 	close(img_fd);
+
+	return 0;
 }
 
-void extract_android(const char* img_filename, unsigned long* offset,
+int extract_android(const char* img_filename, unsigned long* offset,
 	unsigned long* ramdisk_size) {
 	int img_fd;
 	boot_img_hdr header;
@@ -286,20 +290,19 @@ void extract_android(const char* img_filename, unsigned long* offset,
 	unsigned char* buffer;
 
 	if (ramdisk_loc == 3) {
-		close(img_fd);
 		printf("Cannot extract rpm on ANDROID image format.\n");
-		exit(-1);
+		return -1;
 	}
 
 	buffer = (unsigned char*)malloc(sizeof(unsigned char) * header_size);
-	if(buffer == NULL){
+	if (buffer == NULL) {
 		printf("Memory allocation error for header!\n");
-		exit(-1);
+		return -1;
 	}
 
 	if ((img_fd = open(input_filename, O_RDONLY, 0)) < 0) {
 		printf("Unable to open '%s' for read.\n", input_filename);
-		exit(-1);
+		return -1;
 	}
 
 	result = read(img_fd, buffer, header_size);
@@ -307,37 +310,39 @@ void extract_android(const char* img_filename, unsigned long* offset,
 	if (result != header_size) {
 		free(buffer);
 		printf("Error reading '%s' Android header.\n", img_filename);
-		exit(-1);
+		return -1;
 	}
 	memcpy(&header, buffer, header_size);
 	free(buffer);
 
 	if (!header.page_size) {
 		printf("Error, page size is 0\n");
-		exit(-1);
+		return -1;
 	}
 	if (ramdisk_loc == ELF_RAMDISK_LOCATION) {
 		if (!header.ramdisk_size) {
 			printf("Error, ramdisk size is 0!\n");
-			exit(-1);
+			return -1;
 		}
-		*offset = (((header.kernel_size / header.page_size) + 1) * 
+		*offset = (((header.kernel_size / header.page_size) + 1) *
 			header.page_size) + header.page_size;
 		*ramdisk_size = header.ramdisk_size;
 	} else {
 		if (!header.kernel_size) {
 			printf("Error, kernel size is 0!\n");
-			exit(-1);
+			return -1;
 		}
 		*offset = header.page_size;
 		*ramdisk_size = header.kernel_size;
 	}
+
+	return 0;
 }
 
-void extract_ramdisk() {
+int extract_ramdisk_image() {
 	int img_fd, return_val = 0;
 	char output[PATH_MAX];
-	char command[4096], magic_buffer[4];
+	char magic_buffer[4];
 	size_t result, read_size = sizeof(magic_buffer);
 	unsigned long offset, ramdisk_size;
 
@@ -347,32 +352,36 @@ void extract_ramdisk() {
 
 	if (elf_version(EV_CURRENT) == EV_NONE) {
 		printf("ELF library initialization failed.\n");
-		exit(-1);
+		return -1;
 	}
 
 	if ((img_fd = open(input_filename, O_RDONLY, 0)) < 0) {
 		printf("Unable to open '%s' for read.\n", input_filename);
-		exit(-1);
+		return -1;
 	}
 
 	result = read(img_fd, magic_buffer, read_size);
 	if (result != read_size) {
 		close(img_fd);
 		printf("Error reading '%s' to check magic.\n", input_filename);
-		exit(-1);
+		return -1;
 	}
 	close(img_fd);
 
 	if (strncmp(magic_buffer + 1, "ELF", 3) == 0) {
 		printf("ELF format...\n");
-		extract_elf(input_filename, &offset, &ramdisk_size);
+		if (extract_elf(input_filename, &offset, &ramdisk_size)) {
+			return -1;
+		}
 	} else if (strncmp(magic_buffer, "ANDR", 4) == 0) {
 		printf("ANDROID! format...\n");
-		extract_android(input_filename, &offset, &ramdisk_size);
+		if (extract_android(input_filename, &offset, &ramdisk_size)) {
+			return -1;
+		}
 	} else {
 		printf("Unknown magic of '%s' in '%s'.\n", magic_buffer,
-			input_filename);
-		exit(-1);
+				input_filename);
+		return -1;
 	}
 
 	printf("Offset:      %lu\n", offset);
@@ -385,27 +394,31 @@ void extract_ramdisk() {
 		strcat(output, EER_TMP_RAMDISK_CPIO);
 		if (path_exists(output) && unlink(output)) {
 			printf("Unable to unlink '%s'\n", output);
-			exit(-1);
+			return -1;
 		}
 	}
 
-	copy_file_part(input_filename, output, offset,
-		ramdisk_size);
+	if (copy_file_part(input_filename, output, offset, ramdisk_size)) {
+		return -1;
+	}
 	printf("Uncompressed ramdisk written to '%s'.\n", output);
 
 	if (check_ramdisk) {
 		printf("Checking ramdisk to ensure it is not a stock Sony recovery.");
 		printf("\n  (Checking for %s)\n", EER_SEARCH_STRING);
-		unsigned char needle[7] = EER_SEARCH_STRING;
+		unsigned char needle[8] = EER_SEARCH_STRING;
 		unsigned long fota_location;
 		return_val = scan_file_for_data(output, needle, sizeof(needle), 0,
-			&fota_location);
-		if (return_val < 0) {
+				&fota_location);
+		if (return_val == -2) {
+			return -1;
+		}
+		else if (return_val < 0) {
 			printf("This is not a stock Sony recovery ramdisk.\n");
 			if (rename(output, output_filename)) {
 				printf("Failed to rename '%s' to '%s'.\n", output,
-					output_filename);
-				exit(-1);
+						output_filename);
+				return -1;
 			}
 			printf("Ramdisk copied to '%s'\nDONE!\n", output_filename);
 		} else {
@@ -414,6 +427,8 @@ void extract_ramdisk() {
 		}
 		unlink(output);
 	}
+
+	return 0;
 }
 
 void print_usage() {
@@ -426,7 +441,7 @@ void print_usage() {
 	printf("Optional:\n");
 	printf(" -t <target dir>      Specifies directory to use for scratch\n");
 	printf("                      space (uses %s if not specified)\n",
-		EER_DEFAULT_TMP);
+			EER_DEFAULT_TMP);
 	printf(" -d                   Do not gunzip\n");
 	printf(" -c                   Check ramdisk for stock recovery (cannot\n");
 	printf("                      be used with -d)\n\n");
@@ -436,14 +451,14 @@ void print_usage() {
 	printf("copied to the output filename.\n");
 }
 
-int main(int argc, char** argv) {
+int extract_ramdisk(int argc, const char** argv) {
 	int index;
 
 	umask(0);
 
 	if (argc < 5) {
 		print_usage();
-		exit(-1);
+		return -1;
 	}
 
 	strcpy(tmp_dir, EER_DEFAULT_TMP);
@@ -467,7 +482,7 @@ int main(int argc, char** argv) {
 				if (!path_exists(input_filename)) {
 					arg_error = 4;
 					printf("Input filename '%s' does not exist.\n\n",
-						input_filename);
+							input_filename);
 					index = argc;
 				}
 			}
@@ -498,8 +513,7 @@ int main(int argc, char** argv) {
 				strcpy(tmp_dir, argv[index]);
 				if (!path_exists(tmp_dir)) {
 					arg_error = 5;
-					printf("Temp directory '%s' does not exist.\n\n",
-						tmp_dir);
+					printf("Temp directory '%s' does not exist.\n\n", tmp_dir);
 					index = argc;
 				}
 			}
@@ -507,6 +521,8 @@ int main(int argc, char** argv) {
 			dont_unzip = 1;
 		} else if (strncmp(argv[index], "-c", 2) == 0) {
 			check_ramdisk = 1;
+		} else if (strncmp(argv[index], "-z", 2) == 0) {
+			check_ramdisk = 0;
 		} else if (strncmp(argv[index], "-0", 2) == 0) {
 			ramdisk_loc = 1;
 		} else if (strncmp(argv[index], "-2", 2) == 0) {
@@ -520,9 +536,8 @@ int main(int argc, char** argv) {
 
 	if (arg_error != 0) {
 		print_usage();
-		exit(-1);
-	} else {
-		extract_ramdisk();
-		exit(0);
+		return -1;
 	}
+
+	return extract_ramdisk_image();
 }

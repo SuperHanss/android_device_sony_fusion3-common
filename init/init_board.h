@@ -63,7 +63,7 @@
 #define KEYCHECK_ENABLED 1
 #endif
 #ifndef KEYCHECK_TIMEOUT
-#define KEYCHECK_TIMEOUT 3
+#define KEYCHECK_TIMEOUT 5
 #endif
 
 #endif // __INIT_BOARD_H__

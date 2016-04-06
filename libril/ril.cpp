@@ -275,7 +275,6 @@ static void dispatchRadioCapability(Parcel &p, RequestInfo *pRI);
 static int responseInts(Parcel &p, void *response, size_t responselen);
 static int responseFailCause(Parcel &p, void *response, size_t responselen);
 static int responseStrings(Parcel &p, void *response, size_t responselen);
-static int responseStringsDataRegistrationState(Parcel &p, void *response, size_t responselen);
 static int responseString(Parcel &p, void *response, size_t responselen);
 static int responseVoid(Parcel &p, void *response, size_t responselen);
 static int responseCallList(Parcel &p, void *response, size_t responselen);
@@ -2293,37 +2292,6 @@ static int responseStrings(Parcel &p, void *response, size_t responselen) {
     return 0;
 }
 
-/*
- * RIL_RADIO_TECHNOLOGY: 19 (QCOM HSPAP_DC) ==> 30 (CM DCHSPAP)
- */
-static int responseStringsDataRegistrationState(Parcel &p, void *response, size_t responselen) {
-
-    if (response == NULL && responselen != 0) {
-        ALOGE("invalid response: NULL");
-        return RIL_ERRNO_INVALID_RESPONSE;
-    }
-    if (responselen % sizeof(char *) != 0) {
-        ALOGE("invalid response length %d expected multiple of %d\n",
-            (int)responselen, (int)sizeof(char *));
-        return RIL_ERRNO_INVALID_RESPONSE;
-    }
-
-    char **p_cur = (char **) response;
-
-    if (p_cur[3] != NULL) {
-#ifdef RIL_LEGACY_PAP
-        if (strncmp(p_cur[3], "18", 2) == 0) {
-            ALOGE("DATA_REGISTRATION_STATE: stock radioTechnology=18 (QCOM HSPAP_DC) -> CyanogenMod radioTechnology=30 (CM DCHSPAP)");
-#else
-        if (strncmp(p_cur[3], "19", 2) == 0) {
-            ALOGE("DATA_REGISTRATION_STATE: stock radioTechnology=19 (QCOM HSPAP_DC) -> CyanogenMod radioTechnology=30 (CM DCHSPAP)");
-#endif
-            strncpy(p_cur[3], "15", 2);
-        }
-    }
-
-    return responseStrings(p, response, responselen);
-}
 
 /**
  * NULL strings are accepted

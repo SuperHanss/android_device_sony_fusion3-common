@@ -102,10 +102,6 @@ PRODUCT_PACKAGES += \
 PRODUCT_COPY_FILES += \
     $(COMMON_PATH)/rootdir/system/etc/nfcee_access.xml:system/etc/nfcee_access.xml
 
-# Recovery
-PRODUCT_PACKAGES += \
-    keycheck
-
 # Power
 PRODUCT_PACKAGES += \
     power.qcom
@@ -115,10 +111,6 @@ PRODUCT_PACKAGES += qrngd
 
 PRODUCT_COPY_FILES += \
     $(COMMON_PATH)/rootdir/system/etc/kickstart_checker.sh:system/etc/kickstart_checker.sh
-
-# Recovery
-PRODUCT_PACKAGES += \
-    extract_ramdisk
 
 # ART
 PRODUCT_PROPERTY_OVERRIDES += \
